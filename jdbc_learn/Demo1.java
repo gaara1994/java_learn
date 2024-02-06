@@ -1,11 +1,38 @@
 // 导入必要的JDBC包
 
 import java.sql.*;
+import java.util.List;
+import java.util.ArrayList;  // 添加此行
+
 class User {
     private String name;
     private int age;
 
-    // 构造函数、getter和setter省略
+    // 添加构造函数、getter和setter
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public User() {
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {  // 添加setName方法
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {  // 添加setAge方法
+        this.age = age;
+    }
 
     @Override
     public String toString() {
@@ -33,9 +60,39 @@ public class Demo1 {
 
             //4.查
             queryUser(conn,"张三");
+
+            //5.调用新方法并处理结果
+            List<User> result = queryUsersByName(conn, "张三");
+            for (User user : result) {
+                System.out.println("---------------------");
+                System.out.println(user);
+            }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static List<User> queryUsersByName(Connection conn, String name) throws SQLException {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM user WHERE name = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, name);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            User user = new User();
+            user.setName(rs.getString("name"));
+            user.setAge(rs.getInt("age"));
+
+            users.add(user);
+        }
+
+        // 关闭ResultSet和Statement以释放资源
+        rs.close();
+        stmt.close();
+
+        return users;
     }
 
     public static void insertUser(Connection conn,String name,int age) throws SQLException{
